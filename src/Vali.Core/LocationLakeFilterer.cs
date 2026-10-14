@@ -205,42 +205,16 @@ public static class LocationLakeFilterer
     private static IEnumerable<Loc> FilterByGeometries(IEnumerable<Loc> locations, (GeometryFilter filter, Geometry[] geometries)[] geometryFilters)
     {
         var combinationMode = geometryFilters.First().filter.CombinationMode;
-        var preparedFilters = geometryFilters
-            .Select(gf => (gf.filter, geometries: gf.geometries.Select(PreparedGeometryFactory.Prepare).ToArray()))
+        var indexedFilters = geometryFilters
+            .Select(gf => (gf.filter, index: GeometryIndex.For(gf.geometries)))
             .ToArray();
-        var globalEnvelope = new Envelope();
-        foreach (var gf in geometryFilters)
-            foreach (var g in gf.geometries)
-                globalEnvelope.ExpandToInclude(g.EnvelopeInternal);
 
         return combinationMode switch
         {
             "union" => locations
-                .Where(l =>
-                {
-                    if (!globalEnvelope.Covers(l.Lng, l.Lat))
-                    {
-                        return preparedFilters.Any(gf => !gf.filter.LocationsInside);
-                    }
-
-                    var point = new Point(l.Lng, l.Lat);
-                    return preparedFilters
-                        .Any(gf => gf.geometries
-                            .Any(g => g.Covers(point)) == gf.filter.LocationsInside);
-                }),
+                .Where(l => indexedFilters.Any(gf => gf.index.Covers(l.Lng, l.Lat) == gf.filter.LocationsInside)),
             "intersection" => locations
-                .Where(l =>
-                {
-                    if (!globalEnvelope.Covers(l.Lng, l.Lat))
-                    {
-                        return preparedFilters.All(gf => !gf.filter.LocationsInside);
-                    }
-
-                    var point = new Point(l.Lng, l.Lat);
-                    return preparedFilters
-                        .All(gf => gf.geometries
-                            .Any(g => g.Covers(point)) == gf.filter.LocationsInside);
-                }),
+                .Where(l => indexedFilters.All(gf => gf.index.Covers(l.Lng, l.Lat) == gf.filter.LocationsInside)),
             _ => throw new ArgumentOutOfRangeException(nameof(combinationMode), "Only union/intersection acceptable values.")
         };
     }

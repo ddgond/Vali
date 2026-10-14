@@ -24,7 +24,9 @@ public static class GeometryReader
 
             try
             {
-                return GeoJsonSerialization.DeserializeFromFile(path);
+                var geometries = GeoJsonSerialization.DeserializeFromFile(path);
+                Geometries[path] = geometries;
+                return geometries;
             }
             catch (Exception)
             {
