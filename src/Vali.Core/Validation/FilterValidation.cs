@@ -221,6 +221,36 @@ public static class FilterValidation
         return definition;
     }
 
+    public static MapDefinition? ValidateGridFiles(this MapDefinition definition)
+    {
+        foreach (var (key, path) in definition.GridFiles)
+        {
+            if (string.IsNullOrWhiteSpace(key) || !key.All(c => char.IsLetterOrDigit(c) || c is '_' or '-'))
+            {
+                ConsoleLogger.Error($"'{key}' in {nameof(MapDefinition.GridFiles)} must be letters, digits, '_' or '-'.");
+                return null;
+            }
+
+            if (!File.Exists(path))
+            {
+                ConsoleLogger.Error($"File {path} used in {nameof(MapDefinition.GridFiles)} does not exist.");
+                return null;
+            }
+
+            try
+            {
+                ValueGrid.Load(path);
+            }
+            catch (Exception e) when (e is InvalidDataException or EndOfStreamException)
+            {
+                ConsoleLogger.Error($"Could not read the value grid {path}: {e.Message}");
+                return null;
+            }
+        }
+
+        return definition;
+    }
+
     public static MapDefinition? ValidateGeometryFilters(this MapDefinition definition)
     {
         var geometryFilters = definition.GeometryFilters

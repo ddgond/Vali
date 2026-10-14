@@ -34,6 +34,8 @@ public record MapDefinition
     public string[] GlobalExternalDataFiles { get; set; } = [];
     public Dictionary<string, string[]> CountryExternalDataFiles { get; set; } = [];
     public Dictionary<string, Dictionary<string, string[]>> SubdivisionExternalDataFiles { get; set; } = [];
+    /// <summary>Value grids readable as <c>external:&lt;key&gt;</c> in numeric comparisons, by key.</summary>
+    public Dictionary<string, string> GridFiles { get; set; } = [];
 }
 
 public record ProximityFilter

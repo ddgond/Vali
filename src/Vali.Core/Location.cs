@@ -36,12 +36,16 @@ public record Location : IDistributionLocation<long>
 
     public bool HasExternalData => _externalData is { Count: > 0 };
 
+    /// <summary>
+    /// A numeric external value: from the location's external data when it has one for
+    /// <paramref name="key"/>, otherwise from the value grid of that name (see <see cref="ValueGrid"/>).
+    /// </summary>
     public double ExternalNumber(string key) =>
         _externalData is not null &&
         _externalData.TryGetValue(key, out var value) &&
         double.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out var number)
             ? number
-            : double.NaN;
+            : ValueGrid.SampleActive(key, Lat, Lng);
 }
 
 public interface IDistributionLocation<T> : ILatLng

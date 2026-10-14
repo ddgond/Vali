@@ -19,6 +19,7 @@ public class LocationLakeMapGenerator
 
         var logger = ValiLogger.Factory.CreateLogger<LocationLakeMapGenerator>();
         var progress = new GenerationProgress();
+        ValueGrid.Activate(mapDefinition.GridFiles);
 
         // Phase A — prep: resolve files/goals per country and emit one flat work-list.
         var workItems = new List<GenerationWorkItem>();
