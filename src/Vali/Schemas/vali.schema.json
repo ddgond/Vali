@@ -282,6 +282,12 @@
       "propertyNames": {
         "pattern": "^[A-Z]{2}$"
       }
+    },
+    "gridFiles": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
     }
   },
   "definitions": {
